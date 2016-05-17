@@ -115,6 +115,7 @@ Class Enc
 	UnWrapData(Input)
 	{
 		Size := Input.NumGet(Input.Region.2-4,"UInt")
-		return Bin.MoveFrom( Input.Region.1, Size )
+		if (Size+mod(Size+4,8)+4=Input.Region.2)
+			return Bin.MoveFrom( Input.Region.1, Size )
 	}
 }
