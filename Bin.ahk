@@ -23,8 +23,10 @@ class Bin
 		}
 		_SetIntend(Region="")
 		{
-			if !Region
+			if !IsObject(Region)
 				return 0
+			if (Region.2<0)
+				return -2
 			d := this.Region._Test(Region)
 			if (d>0)
 				return this._Resize(Region.1+Region.2)
@@ -294,9 +296,7 @@ class Bin
 		For each,Format in this.LinkerFn
 		{
 			If IsObject(Format)
-			{
 				This.ObjHelper.Merge.Call(LinkerFn,[Format])
-			}
 		}
 		This.Define("default",[This.AccessFn,This.AllocFn,LinkerFn])
 		THis.Define("wrapper",[This.AccessFn,LinkerFn])
