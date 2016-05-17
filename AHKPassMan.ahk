@@ -8,22 +8,27 @@ SetBatchLines,-1
 if FileExist("EncData.dat")
 {
 	EncDat := Bin.FromFile("EncData.dat")
-	InputBox,PassStr,Password,Please insert your Master password
-	If !PassStr
-		FileDelete,EncData.dat
-	Else
+	Loop
 	{
+		InputBox,PassStr,Password,% ["Please insert your Master password","Please insert your correct Master password"][(A_Index>1)+1]
+		if !passstr
+			break
 		PassDat := Bin.StrPut(PassStr,"Utf-8")
 		PassStr := ""
 		Data := Enc.Decrypt(EncDat,PassDat)
 		EncDat := ""
-		d := OpenData(Data)
-		Data := ""
+		If IsObject(Data)
+		{
+			If IsObject(d := OpenData(Data))
+			{
+				Data := ""
+				break
+			}
+		}
 	}
 }
 Gui,Add,ActiveX,vWb x0 y0 h400 w600,Shell.Explorer
 Wb.Navigate("about:blank")
-
 HTML = 
 (
 <!DOCTYPE HTML>
@@ -53,7 +58,6 @@ HTML =
 	</body>
 </html>
 )
-
 while wb.ReadyState != 4
 	Sleep 10
 wb.Document.open()
@@ -64,7 +68,7 @@ btnadd.onclick := func("addnew")
 l := new List(wb,"list")
 For each,row in d
 	l.Push(row*)
-		
+d := ""
 Gui,Show,h400 w600,Password Manager
 return
 GuiClose:
@@ -121,7 +125,7 @@ class List
 		if !newval
 			return
 		td := this.Table[x,y]
-		td.removeChild(td.childNodes[0])
+		td.innerHTML := ""
 		td.appendChild(this.Document.createTextNode( newval ))
 		
 	}
@@ -151,13 +155,13 @@ OpenData(Data)
 	loop 
 	{
 		oo := []
-		ret.Push(oo)
 		Loop,2
 		{
 			oo.Push(s:=Sub.StrGet("Utf-16"))
-			
-			if !s
-				return ret
+			if !mod(A_Index,2)
+				ret.Push(oo)
+			if (!s)
+				return mod(A_Index,2)?ret:""
 			Sub := Sub.Offset(StrPut(s,"Utf-16")*2)
 		}
 	}
@@ -167,7 +171,7 @@ SaveData(passarray)
 	oBin := Bin.Alloc()
 	For each,KeyVal in passarray
 		For each,str in KeyVal
-			oBin.Offset( oBin.Region.2, StrPut( str, "Utf-16" ) * 2 ).StrPut( str, "Utf-16" ) ;append str
+			oBin.Offset( oBin.Region.2, StrPut( str, "Utf-16" ) * 2 ).StrPut( str, "Utf-16" )
 	oBin.NumPut(0,oBin.Region.2,"UShort")
 	return oBin
 }
